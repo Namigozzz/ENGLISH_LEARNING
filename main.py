@@ -6,8 +6,8 @@ import psycopg2
 import streamlit as st
 import plotly.express as px
 
-load_dotenv('variables.env')
 
+load_dotenv('variables.env')
 
 st.set_page_config(
     page_title="EnglishCard - Изучение английского",
@@ -24,6 +24,7 @@ def get_db_connection():
         password=os.getenv("PASSWORD"),
         port=os.getenv("PORT")
     )
+
     return conn
 
 
@@ -66,7 +67,6 @@ def init_database():
             );
         ''')
 
-        # Заполнение common_words начальными словами (10 слов)
         cur.execute('''
             INSERT INTO common_words (russian_word, english_word)
             VALUES
@@ -329,41 +329,28 @@ def generate_options(correct_word, all_words):
 
 def render_sidebar():
     with st.sidebar:
-        st.image("https://cdn-icons-png.flaticon.com/512/2888/2888407.png", width=100)
-        st.title("EnglishCard")
-
         if 'user_id' not in st.session_state or st.session_state.user_id is None:
             st.subheader("👤 Вход в систему")
             username = st.text_input("Введите ваше имя:", placeholder="Ваше имя...")
 
-            if st.button("🚀 Начать обучение", use_container_width=True):
+            if st.button("Войти", use_container_width=True):
                 if username:
                     user_id = login_user(username)
                     if user_id:
                         st.session_state.user_id = user_id
                         st.session_state.username = username.strip()
                         st.session_state.show_next = False
-                        st.session_state.studied_words = []
-                        st.success(f"✅ Добро пожаловать, {username}!")
                         st.rerun()
                 else:
-                    st.warning("⚠️ Пожалуйста, введите имя!")
+                    st.warning("Пожалуйста, введите имя!")
         else:
-            st.success(f"👋 Привет, {st.session_state.username}!")
-            st.divider()
+            st.subheader("👤 Профиль")
+            st.success(f"Вы вошли как: **{st.session_state.username}**!")
 
-            stats = get_statistics(st.session_state.user_id)
-            if stats:
-                st.metric("📚 Всего слов", stats['total_words'])
-                st.metric("🎯 Точность", f"{stats['accuracy']}%")
-
-            st.divider()
-
-            if st.button("🚪 Выйти", use_container_width=True):
+            if st.button("Выйти", use_container_width=False):
                 st.session_state.user_id = None
                 st.session_state.username = None
                 st.session_state.show_next = False
-                st.session_state.studied_words = []
                 st.rerun()
 
 
@@ -546,7 +533,6 @@ def main():
         st.session_state.user_id = None
         st.session_state.username = None
         st.session_state.show_next = False
-        st.session_state.studied_words = []
         st.session_state.words_changed = True
 
     init_database()
