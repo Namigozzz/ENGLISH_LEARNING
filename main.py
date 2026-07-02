@@ -440,7 +440,6 @@ def render_add_word_tab():
 
     if st.session_state.user_id is None:
         st.warning("⚠️ Пожалуйста, авторизуйтесь для добавления слов")
-        return
 
     with st.form("add_word_form", clear_on_submit=True):
         russian_word = st.text_input("Введите слово на русском:", placeholder="Например: Компьютер")
@@ -465,13 +464,11 @@ def render_delete_word_tab(words):
 
     if st.session_state.user_id is None:
         st.warning("⚠️ Пожалуйста, авторизуйтесь для удаления слов")
-        return
 
     personal_words = [word for word in words if word['word_type'] == 'personal']
 
     if not personal_words:
         st.info("ℹ️ У вас пока нет персональных слов для удаления")
-        return
 
     with st.form("delete_word_form"):
         word_options = {f"{word['russian_word']} - {word['english_word']}": word['id'] for word in personal_words}
@@ -528,6 +525,14 @@ def render_statistics_tab(user_id):
         st.info("ℹ️ Нет данных для отображения статистики. Начните изучение слов!")
 
 
+def render_schema():
+    with st.expander("🗄️ Схема базы данных"):
+        if st.session_state.user_id is None:
+            st.warning("⚠️ Пожалуйста, авторизуйтесь для просмотра ERD-схемы")
+        else:
+            st.image("ERD.png")
+
+
 def main():
     if 'user_id' not in st.session_state:
         st.session_state.user_id = None
@@ -554,6 +559,8 @@ def main():
             render_delete_word_tab(words)
         with tab4:
             render_statistics_tab(st.session_state.user_id)
+
+        render_schema()
     else:
         st.markdown("""
         ### 👋 Привет! Давай попрактикуемся в английском языке.
